@@ -1,0 +1,7 @@
+sub cr_grpup
+{
+  my $rnum = `jot -r 1 0 16`;
+  my $grp = $grp[$rnum];
+  return $grp;
+}
+

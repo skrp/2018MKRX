@@ -1,0 +1,27 @@
+#!/usr/local/bin/perl
+use strict; use warnings;
+my ($node) = @ARGV;
+zfs_uact($node);
+
+sub zfs_uact
+{
+	my ($node) = @_;
+	my @un = `zpool import | grep pool: | sed 's/.*: //' | sed 's/ .*//'`;
+	chomp @un;
+	init_nfs($node, @un);
+}
+sub pool_nfs
+{
+	my ($node, @pool) = @_;
+	my $loc = '/usr/ANONI/nfs/$node';
+	for (@pool)
+	{
+		my $loc = "/usr/ANONI/nfs/$node/$_";
+
+		`zpool import -f $_`;
+		`zfs set mountpoint=$loc $_`;
+		`zfs set sharenfs=on $_`;
+		`zfs set readonly=on $_`;
+		print "FAIL $_\n" unless (-d "$loc");
+	}
+}

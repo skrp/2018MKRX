@@ -1,0 +1,19 @@
+sub cr_home
+{
+  my ($usr) = @_;
+  my $home = "/usr/home/$usr/";
+  
+  my $ssh = $home.'.ssh/';
+  my $udir = $home.'mount/';
+  my $g = $home.'BANK/g/';
+  my $p = $home.'BANK/pool/';
+
+  mkdir $home;
+  mkdir("$udir"); 
+  mkdir("$ssh");
+  mkdir("$g");
+  mkdir("$p");
+  
+  copy("$usb/KERN/conf/.cshrc","$home");
+  `ln -s /usr/ANONI/HIVE/FEED/norm/ /usr/home/$usr/FEED`;
+}

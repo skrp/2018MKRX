@@ -1,0 +1,52 @@
+sub camcontrol
+{
+	my ($usr, $file) = @_;
+	my (@rootcam, @usrcam, @set, @cmd);
+	my ($msg1, $msg2, $udir);
+
+	my %fs = ( zfs => \&zfs_priv, fat => \&fat );
+
+	$msg1 = 'ZOE: be sure deviced disconnected [5min]';
+	$msg2 = 'ZOE: available dev';
+	$udir = "/usr/home/$usr/mount/";
+
+	out($usr, $msg1);
+	sleep 5;
+
+	@rootcam = `camcontrol devlist`;
+	chomp @rootcam;
+	$_ =~ s%.*\(%% for @rootcam;
+	$_ =~ s%,.*%% for @rootcam;
+
+	out($usr, 'insert now');
+	sleep 30;
+	
+	@usrcam = `camcontrol devlist`;
+	chomp @usrcam;
+	$_ =~ s%.*\(%% for @usrcam;
+	$_ =~ s%,.*%% for @usrcam;
+
+	@set = uniq(\@rootcam, \@usrcam);
+
+	$msg2 .= " dev=$_" for @set;
+	
+	my @imp = `zpool import`;
+	chomp @imp;
+	if (defined $imp[0])
+	{
+		$imp[0] =~ s%.*pool: %%;
+		$msg2 .= " zfs=$imp[0]";
+	}
+	out($usr, $msg2);
+
+	sleep 5;
+	my @c = slurp($file);
+	chomp @c;
+	my @cmds = split(" ", $c[0]);
+	$fs{$cmds[0]}->($cmds[1], $usr, $udir);
+
+	out($usr, 'usb mounted');
+	$YAY++;
+
+	unlink $zoe;
+}

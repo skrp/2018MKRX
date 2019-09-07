@@ -1,0 +1,77 @@
+#use Digest::SHA;
+#my ($file, $src, $of) = @_;
+#die "ARG1 file ARG2 src ARG3 outfile\n" unless (defined $of);
+#$src =~ s%/\z%%;
+##########################
+#my @p = qw(0 . 1 2 3 4 5 6 + 7 8 9 / * - q w e r a s d f z x c v);
+#my @dict = slurp('/usr/share/dict/web2');
+#my $pp = cr_pass();
+#my $real = $pp;
+#$real =~ s% %%g;
+#krip_e($file, $src, $of);
+##########################
+sub krip_e
+{
+	my ($file, $src, $of) = @_;
+	my $osha = f_digest($file);	
+	
+	`openssl des3 -in $file -out $of -k $real`;
+##########################
+	my $sha = f_digest($of);	
+	my $meta = $src.'/g/x'.$sha;
+	open(my $ifh,'>', $meta) or die "FAIL meta $!\n";
+	print $ifh "$pp\n$osha";
+}
+##########################
+sub cr_pass
+{
+	my $pass;
+
+	my $cnt = 0;
+	my $p_count = @p; $p_count--;
+	my $tag = `jot -r 1 0 4`;
+	chomp $tag;
+	while ($cnt < 5)
+	{
+		$cnt++;
+		if ($cnt == $tag)
+		{
+			die "FAIL set\n" unless (defined $dict[2]);	
+			my $i = `jot -r 1 0 230000`;
+			chomp $i;
+			$pass .= $dict[$i];
+			$pass .= ' ';
+			next;
+		}
+		my @set = `jot -r 5 0 $p_count`;
+		chomp @set;
+		for (@set)
+		{
+			no warnings 'uninitialized';	
+			$pass .= $p[$_];
+		}
+		$pass .= ' ';
+	}
+############################
+	chop $pass;
+	return $pass;
+}
+sub slurp 
+{
+	my ($file) = @_;
+	my $subfh; 
+	my @slurp;
+
+	open($subfh, '<', $file) or die "FAIL slurp $file : $!\n";
+	@slurp = readline $subfh;
+	close $subfh; chomp @slurp;
+
+	return @slurp;
+}
+sub f_digest 
+{
+    my ($filename) = @_;
+    my $digest = Digest::SHA->new(256);
+    $digest->addfile($filename, "b");
+    return $digest->hexdigest();
+}

@@ -1,0 +1,34 @@
+sub cr_nfs
+{
+	my ($node) = @_;
+	$node =~ s%/\z%%;
+
+	my $rnfs = "zroot/usr/ANONI/nfs/$node";
+	my $pub = "$rnfs/pub";
+	my $WORLD = "$rnfs/WORLD";
+	my $dump = "$rnfs/dump";
+
+	my $p = "/usr/ANONI/nfs/$node/dump/pool";
+	my $g = "/usr/ANONI/nfs/$node/dump/g";
+
+	`zfs create zroot/usr/ANONI/nfs`;
+#	`zfs set sharenfs=on /usr/ANONI/nfs`;
+	`zfs create $rnfs`;
+	`zfs set sharenfs=on $rnfs`;
+	`zfs create $pub`;
+	`zfs set sharenfs=on $pub`;
+	`zfs create $WORLD`;
+	`zfs set sharenfs=on $WORLD`;
+	`zfs create $dump`;
+	`zfs set sharenfs=on $dump`;
+
+	`mkdir $p`;
+	`mkdir $g`;
+
+	`chmod 555 /usr/ANONI/nfs/`;
+	`chmod 555 /usr/ANONI/nfs/$node/`;
+	`chmod 777 /usr/ANONI/nfs/$node/pub`;
+	`chmod 555 /usr/ANONI/nfs/$node/WORLD`;
+	`chmod -R 333 /usr/ANONI/nfs/$node/dump`;
+	return 0;
+}

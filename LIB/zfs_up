@@ -1,0 +1,32 @@
+sub zfs_up
+{
+	my @pool = slurp('/etc/pool');
+	my $hn = `hostname`; chomp $hn;
+	my $loc = "/usr/ANONI/nfs/$hn";
+
+	for (@pool)
+	{
+		`zpool import -f $_`;
+		sleep 300;
+		`zfs set mountpoint=/$_ $_`;
+		`zfs set readonly=on $_`;
+		`zfs set sharenfs=on  $_`;
+		`zpool export -f $_`;
+		sleep 300;
+
+		`zpool import -o altroot=$loc $_`;
+		print "FAIL $_\n" unless (-d "$loc");
+	}
+}
+sub slurp 
+{
+	my ($file) = @_;
+	my $subfh; 
+	my @slurp;
+
+	open($subfh, '<', $file) or die "FAIL slurp $file : $!\n";
+	@slurp = readline $subfh;
+	close $subfh; chomp @slurp;
+
+	return @slurp;
+}

@@ -1,0 +1,9 @@
+sub ping
+{
+	my ($addr) = @_;
+
+	my @r = `ping -c 1 $addr`;
+	chomp @r;
+
+	return "$r[1]\n$r[5]\n";
+}

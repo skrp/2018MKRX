@@ -1,0 +1,13 @@
+sub SLEEP
+{
+	my ($cnt, $ttl, @QUE) = @_;
+	my ($Sfh, $timeout, $curTIME);
+	open($Sfh, '<', $SLEEP);
+	$timeout = readline $Sfh; chomp $timeout;
+	$curTIME = TIME();
+	print $Lfh "SLEEP $curTIME $timeout\n";	
+	close $Sfh; unlink $SLEEP;
+	SUICIDE($cnt, $ttl, @QUE) if ($timeout eq 'SUICIDE');
+	tombstone($cnt, $ttl);
+	sleep $timeout;
+}

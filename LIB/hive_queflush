@@ -1,0 +1,7 @@
+sub hive_queflush
+{
+	my (@QUE) = @_;
+	open(my $TODOfh. '>', $TODO);
+	print $TODOfh "$_\n" for (@QUE);
+	close $TODOfh;	
+}

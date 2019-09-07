@@ -1,0 +1,11 @@
+sub cr_grp
+{
+  my @c = qw(wheel clan rep world net zfs hive src ark);
+
+  push(@grp, $_) for (@c);
+  push(@grp, "x$_") for (@grp);
+  
+  `pw groupadd $_` for (@grp);
+  
+  return @grp;
+}

@@ -1,0 +1,41 @@
+#use Digest::SHA;
+#use File::Copy;
+#my ($kdump, $mdump, $ip4, $node, $igrp, $iu) = @ARGV;
+#cr_key($kdump, $mdump, $ip4, $node, $igrp, $iu);
+############################
+sub cr_prikey
+{
+	my ($kdump, $mdump, $node, $igrp, $iu) = @_;
+	die "ARG1 keydump ARG2 keymetadump ARG3 node ARG4 grp ARG5 usr\n" unless (defined $iu);
+############################
+	my $key = "/usr/home/$iu/.ssh/id_rsa";
+	my $pub = $key.'.pub';
+############################
+	my $ipass = neopass();
+	my $upass = $ipass;
+	$ipass =~ s% %%g;
+############################
+	`ssh-keygen -q -N "$ipass" -t rsa -b 2048 -f $key`;
+############################
+	my @pub = slurp($pub);
+	my @pp = split(" ", $pub[0]);
+	
+	open($pfh, '>', $pub);
+	print $pfh "$pp[0] $pp[1]";
+	close $pfh;
+############################
+	my $isha = f_digest($key);
+	move($key, "$kdump/$isha");
+############################
+	copy($pub, "$kdump/p$isha");
+	move($pub, "/usr/home/$iu/.ssh/authorized_keys");
+############################
+	key_meta($mdump, $node, $igrp, $iu, $isha);
+
+	open($kfh, '>>', "$mdump/k$isha");
+	print $kfh "u$pass";
+	close $kfh;
+
+	print "$key created\n";
+}
+############################

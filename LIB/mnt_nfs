@@ -1,0 +1,6 @@
+sub nfs_mnt
+{
+	my ($from, $where) = @_;
+	die "ARG1 from ARG2 where\n" unless (defined $where);
+	`mount -t nfs -o nfsv4 $from:/ /usr/ANONI/nfs/$where`;
+}

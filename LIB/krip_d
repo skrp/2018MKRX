@@ -1,0 +1,37 @@
+#use Digest::SHA;
+#my ($file, $src, $of) = @ARGV;
+#krip_d($file, $src, $of);
+sub krip_d
+{
+	my ($file, $src, $of) = @_;
+	die "ARG1 file ARG2 src ARG3 outfile\n" unless (defined $of);
+	$src =~ s%/\z%%;
+	my $hn = `hostname`; chomp $hn;
+##########################
+	my $isha = f_digest($file);
+	my @pass = slurp("$src/g/x$isha"); 
+	$pass[0] =~ s% %%g;
+	chomp $pass[0];
+##########################
+	`openssl des3 -d -in $file -out $of -k $pass[0]`;
+}
+##########################
+sub f_digest 
+{
+    my ($filename) = @_;
+    my $digest = Digest::SHA->new(256);
+    $digest->addfile($filename, "b");
+    return $digest->hexdigest();
+}
+sub slurp 
+{
+	my ($file) = @_;
+	my $subfh; 
+	my @slurp;
+
+	open($subfh, '<', $file) or die "FAIL slurp $file : $!\n";
+	@slurp = readline $subfh;
+	close $subfh; chomp @slurp;
+
+	return @slurp;
+}

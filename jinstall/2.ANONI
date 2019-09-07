@@ -1,0 +1,189 @@
+#!/usr/local/bin/perl
+use strict; use warnings;
+use File::Copy;
+use Digest::SHA;
+############################
+# ANONI - anoni jail populate
+############################
+my ($usb, $node) = @ARGV;
+die "ARG1 /USB ARG2 HOSTNAME\n" unless (defined $node);
+$usb =~ s%/\z%%;
+# GLOBAL ###################
+my $shell = '/bin/csh';
+my $limit = 2000;
+my @list = 10..$limit;
+# PASSBUTTONS ##############
+my @p = qw(0 . 1 2 3 4 5 6 + 7 8 9 / * - q w e r a s d f z x c v);
+############################
+my $kdump = $usb.'/BANK/pool/';
+my $mdump = $usb.'/BANK/g/';
+############################
+my @grp = qw(norm heir);
+
+`pw groupadd $_` for (@grp);
+
+mkdir("/root/grp");
+mkdir("$usb/BANK/host/$node/$_/") for @grp;
+############################
+cr_home($_) for (@list);
+cr_usr($_) for (@list);
+############################
+sub grp
+{
+#////////////////////////////////////
+	my $grp = 'norm';
+#////////////////////////////////////
+	my $rnum = `jot -r 1 0 16`;
+	$grp = 'heir' if ($rnum == 1);
+	return $grp;	
+}
+sub cr_home
+{
+	my ($usr) = @_;
+#////////////////////////////////////
+	my $home = "/usr/home/$usr/";
+#////////////////////////////////////
+	my $ssh = "$home.ssh";
+	my $udir = $home.'usb';
+############################
+	mkdir("$home");
+	mkdir("$ssh");
+	mkdir("$udir");
+#	$usb/KERN/conf/.vimrc $home`;
+	copy("$usb/KERN/conf/.cshrc","$home");
+}
+############################
+sub cr_normkey
+{
+	my ($kdump, $mdump, $node, $igrp, $iu) = @_;
+	die "ARG1 keydump ARG2 keymetadump ARG3 node ARG4 grp ARG5 usr\n" unless (defined $iu);
+
+	my $key = "/usr/home/$iu/.ssh/id_rsa";
+	my $pub = $key.'.pub';
+############################
+	`ssh-keygen -q -N "" -t rsa -b 2048 -f $key`;
+############################
+	my $isha = f_digest($key);
+	move($key, "$kdump/$isha");
+############################
+	my @pub = slurp($pub);
+	my @pp = split(" ", $pub[0]);
+
+	open(my $pfh, '>', $pub);
+	print $pfh "$pp[0] $pp[1]";
+	close $pfh;
+
+	copy($pub, "$kdump/p$isha");
+	move($pub, "/usr/home/$iu/.ssh/authorized_keys");
+
+	key_meta($mdump, $node, $igrp, $iu, $isha);
+
+	print "$key created\n";
+}
+sub cr_prikey
+{
+	my ($kdump, $mdump, $node, $igrp, $iu) = @_;
+	die "ARG1 keydump ARG2 keymetadump ARG4 node ARG5 grp ARG6 usr\n" unless (defined $iu);
+#///////////////////////////////////////////////////
+	my $key = "/usr/home/$iu/.ssh/id_rsa";
+	`pw usermod -n $iu -G wheel`;
+#///////////////////////////////////////////////////
+	my $pub = $key.'.pub';
+############################
+	my @pass = neopass();
+############################
+	`ssh-keygen -q -N "$pass[0]" -t rsa -b 2048 -f $key`;
+############################
+	my $isha = f_digest($key);
+	move($key, "$kdump/$isha");
+############################
+	my @pub = slurp($pub);
+	my @pp = split(" ", $pub[0]);
+	
+	open(my $pfh, '>', $pub);
+	print $pfh "$pp[0] $pp[1]";
+	close $pfh;
+
+	copy($pub, "$kdump/p$isha");
+#///////////////////////////////////////////////////
+	move($pub, "/usr/home/$iu/.ssh/authorized_keys");
+#///////////////////////////////////////////////////
+############################
+	key_meta($mdump, $node, $igrp, $iu, $isha);
+############################
+	open(my $kfh, '>>', "$mdump/k$isha");
+	print $kfh "$pass[1]";
+	close $kfh;
+############################
+	print "$key created\n";
+}
+sub key_meta
+{
+	my ($mdump, $node, $igrp, $iu, $isha) = @_;
+	
+	open(my $fh, '>>', "$mdump/k$isha");
+	
+	print $fh "$node\n";
+	print $fh "$igrp\n";
+	print $fh "$iu\n";
+	close $fh;
+}
+sub f_digest 
+{
+    my ($filename) = @_;
+    my $digest = Digest::SHA->new(256);
+    $digest->addfile($filename, "b");
+    return $digest->hexdigest();
+}
+sub neopass
+{
+	my @pass;
+
+	my $cnt2 = 0;
+	my $p_count = @p; $p_count--;
+	while ($cnt2 < 4)
+	{
+		my @set = `jot -r 5 0 $p_count`;
+		chomp @set;
+		for (@set)
+		{
+			no warnings 'uninitialized';	
+			$pass[0] .= $p[$_];
+			$pass[1] .= $p[$_];
+		}
+		$cnt2++;
+		$pass[1] .= ' ';
+	}
+
+	chop $pass[1];
+	return @pass;
+}
+sub slurp 
+{
+	my ($file) = @_;
+	my $subfh; 
+	my @slurp;
+
+	open($subfh, '<', $file) or die "FAIL slurp $file : $!\n";
+	@slurp = readline $subfh;
+	close $subfh; chomp @slurp;
+
+	return @slurp;
+}
+sub cr_usr
+{
+  my ($iu) = @_;
+  my $home = "/usr/home/$iu/";
+  `pw useradd -n $iu -d $home -s $shell`;
+
+  my $igrp = grp();
+  `pw usermod -n $iu -G $igrp`;
+#///////////////////////////////////////////////////
+  if ($igrp eq 'norm')
+    { cr_normkey ($kdump, $mdump, $node, $igrp, $iu); }
+  else 
+    { cr_prikey($kdump, $mdump, $node, $igrp, $iu); }
+#///////////////////////////////////////////////////
+  `chmod -R 700 $home`;
+  `chown -R $iu $home`;
+}

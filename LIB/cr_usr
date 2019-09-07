@@ -1,0 +1,15 @@
+# my $shell = '/bin/csh';
+sub cr_usr
+{
+  my ($iu) = @_;
+  my $home = "/usr/home/$iu/";
+  `pw useradd -n $iu -d $home -s $shell`;
+
+  my $igrp = grp();
+  `pw usermod -n $iu -G $igrp`;
+
+  cr_prikey($kdump, $mdump, $node, $igrp, $iu);
+
+  `chmod -R 700 $home`;
+  'chown -R $iu $home`;
+}

@@ -1,0 +1,12 @@
+sub cr_keymeta
+{
+	my ($mdump, $node, $igrp, $iu, $isha) = @_;
+	
+	open(my $keyfh, '>>', "$mdump/k$isha");
+	
+	print $keyfh "$node\n";
+	print $keyfh "igrp\n";
+	print $keyfh "iu\n";
+	
+	close $keyfh;
+}
