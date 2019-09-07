@@ -1,0 +1,34 @@
+#!/usr/local/bin/perl
+use strict; use warnings;
+###########################
+# PERM - chmod chown filesys
+###########################
+my ($node) = @ARGV;
+die "FAIL ARG1 node\n" unless (defined $node);
+###########################
+`chmod 777 '/usr/ANONI/HIVE/FEED/norm'`;
+`chmod 777 /usr/ANONI/nfs/$node/pub`;
+###########################
+`chmod -R 700 /root/`;
+`chmod 700 /var/spool/lpd/lp`;
+`chmod -R 700 /BANK/`;
+chmod(770,'/KRIP/norm/');
+chmod(770,'/KRIP/lord/');
+###########################
+`chmod -R 555 /KRIP/`;
+`chmod 555 /bin/*`;
+chmod(555,'/usr/ANONI/dump/');
+`chmod -R 555 /usr/src/KERN/`;
+`chmod 555 /usr/ANONI/nfs/`;
+`chmod 555 /usr/ANONI/nfs/$node/`;
+`chmod 555 /usr/ANONI/nfs/$node/WORLD`;
+###########################
+chmod(300,'/usr/ANONI/dump/pool/');
+chmod(300,'/usr/ANONI/dump/g/');
+`chmod -R 333 /usr/ANONI/nfs/$node/dump`;
+###########################
+`chown -R root /root/`;
+`chown -R root /KRIP/`;
+`chown -R root /BANK/`;
+`chmod +x /etc/rc.d/hive`;
+`chown daemon:daemon /var/spool/lpd/lp`;

@@ -1,0 +1,12 @@
+#!/bin/sh
+. /etc/rc.subr
+name="hive"
+rcvar=hive_enable
+#command="perl /bin/DEMON_TED"
+load_rc_config $name
+#run_rc_command "$1"
+perl /bin/TED
+perl /bin/ALEX
+perl /bin/ZOE
+perl /bin/CAM
+perl /bin/WUF

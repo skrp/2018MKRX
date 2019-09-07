@@ -1,0 +1,143 @@
+#!/usr/local/bin/perl
+use strict; use warnings;
+use File::Copy;
+use Digest::SHA;
+###########################
+# KEYUP - creat host usr
+###########################
+my ($usb, $node, $ip4, $kdump, $mdump, $start, $end) = @ARGV;
+die "ARG1 /usb ARG2 node ARG3 ip4 ARG4 kdump ARG5 metadump ARG6 start ARG7 end\n" unless (defined $end);
+$usb =~ s%/\z%%;
+
+# PASSBUTTON ##############
+my @p = qw(0 . 1 2 3 4 5 6 + 7 8 9 / * - q w e r a s d f z x c v);
+my @list = $start..$end;
+my $shell = '/bin/csh';
+my @grp = qw(wheel clan rep world pf zfs usb hive src);
+############################
+mkdir "/root/grp/" unless (-d "/root/grp/");
+for (@grp)
+  { `touch /root/grp/$_` unless (-e "/root/grp/$_" ); }
+############################
+cr_home($_) for (@list);
+cr_usr($_) for (@list);
+############################
+sub cr_home
+{
+	my ($usr) = @_;
+############################
+	my $home = "/usr/home/$usr/";
+	mkdir $home;
+############################
+	#copy($home, "$usb/KERN/conf/.vimrc $home");
+	my $ssh = $home.'.ssh/';
+	mkdir("$ssh");
+	`chown -R $usr $ssh`;
+############################
+	copy("$usb/KERN/conf/.cshrc","$home");
+	print "$home\n";
+}
+############################
+sub cr_usr
+{
+	my ($usr) = @_;
+	my $home = "/usr/home/$usr/";
+	`pw useradd -n $usr -d $home -s $shell`;
+	`chmod -R 700 $home`;
+	`chown -R $usr $home`;
+	
+	my $grp = grp();
+	`pw usermod -n $usr -G $grp`;
+	`echo '$usr' >> /root/grp/$grp`; 
+	print "$usr created\n";
+############################
+	`chmod -R 700 $home.ssh`;
+
+	cr_key($grp, $usr);
+	
+	`chmod -R 700 $home.ssh`;
+}
+############################
+sub grp
+{
+	my $rnum = `jot -r 1 0 8`;
+	my $grp = $grp[$rnum];
+	return $grp;
+}
+############################
+sub cr_key
+{
+	my ($igrp, $iu) = @_;
+############################
+	my $key = "/usr/home/$iu/.ssh/id_rsa";
+	my $pub = $key.'.pub';
+############################
+	my @pass = neopass();
+############################
+	`ssh-keygen -q -N "$pass[0]" -t rsa -b 2048 -f $key`;
+############################
+	my $isha = f_digest($key);
+	move($key, "$kdump/$isha");
+
+	copy($pub, "$kdump/p$isha");
+	move($pub, "/usr/home/$iu/.ssh/authorized_keys");
+	`echo "$pass[1]" > $mdump/p$isha`;
+############################
+	key_meta($igrp, $iu, $isha);
+############################
+	print "$key created\n";
+}
+sub key_meta
+{
+	my ($igrp, $iu, $isha) = @_;
+	my $idate = time();
+	
+	open(my $fh, '>>', "$mdump/k$isha");
+	
+	print $fh "$ip4\n";
+	print $fh "$node\n";
+	print $fh "$igrp\n";
+	print $fh "$iu\n";
+	print $fh "$idate\n";
+	close $fh;
+}
+sub f_digest 
+{
+    my ($filename) = @_;
+    my $digest = Digest::SHA->new(256);
+    $digest->addfile($filename, "b");
+    return $digest->hexdigest();
+}
+sub time 
+{
+	my ($t, $mon, $day, $hour, $time);
+	$t = localtime();
+	$mon = (split(/\s+/, $t))[1];
+	$day = (split(/\s+/, $t))[2];
+	$hour = (split(/\s+/, $t))[3];
+	$time = $mon.'_'.$day.'_'.$hour;
+	return $time;
+}
+sub neopass
+{
+	my @p = qw(0 . 1 2 3 4 5 6 + 7 8 9 / * - q w e r a s d f z x c v);
+	my @pass;
+############################
+	my $cnt2 = 0;
+	while ($cnt2 < 4)
+	{
+		my @set = `jot -r 5 0 26`;
+		chomp @set;
+		for (@set)
+		{
+			no warnings 'uninitialized';	
+			$pass[0] .= $p[$_];
+			$pass[1] .= $p[$_];
+		}
+		$cnt2++;
+		$pass[1] .= ' ';
+	}
+############################
+	chop $pass[1];
+	return @pass;
+}
