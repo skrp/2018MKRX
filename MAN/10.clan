@@ -1,0 +1,14 @@
+#################################
+CLAN is a password authenticated jail user
+#################################
+/CLAN/REP
+/CLAN/file   : file clan
+/CLAN/src    : src clan
+/CLAN/log    : points clan
+#################################
+dir of zfs quota clan user /usr/ANONI/WORLD/
+this allows users to create permenant space
+#################################
+clan layers: pub clan boss
+#################################
+/etc/group

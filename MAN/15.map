@@ -1,0 +1,29 @@
+# MAP #############################
+/root/         warren
+/bin/          host only executable
+/sbin/         host only privledged executable
+/etc/          host system configuration
+/etc/hosts     ip4 to hostname
+/etc/pool
+/etc/pf_net
+/tmp/          owner-only tmp workspace
+/CLAN/         clan REP
+/KRIP/         pools of farmed $KEY
+/KRIP/norm/    pools of farmed jail $KEY
+/KRIP/lord/    pools of farmed host $KEY
+/BANK/         host $KEY pool 
+/BANK/REP      host $KEY pool 
+/BANK/pool/    host $KEY pool 
+/BANK/g/       meta
+/usr/home/     lord home dir
+/usr/ANONI/    jail world 
+/usr/ANONI/src/       system source files
+/usr/ANONI/LIB/perl/  perl library
+/usr/ANONI/LIB/c/     c library
+/usr/ANONI/LIB/bash/  bash library
+/usr/ANONI/LIB/book/  pdf coding books
+/usr/ANONI/HIVE/      DEMON world [ping todo FEED bio]
+/usr/ANONI/nfs/$node  node network file system pools
+/usr/ANONI/nfs/$node/pub/         public dir 
+/usr/ANONI/nfs/$node/WORLD/       clan dir
+/usr/ANONI/nfs/$node/CENSUS/      pool file lists

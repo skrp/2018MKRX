@@ -1,0 +1,35 @@
+# SERVICE ####################
+each node has a choice of services to offer network
+  - bounce traffic to obfuscate user-physical-location
+  - send/receive messages via mail
+  - send/receive files
+  - proxy wifi-device traffic to circumvent user-tracking
+# PROTOCOL ###################
+
+PHYSICAL
+  con user shell access
+  music via moc
+INTERNAL
+  norm shell access
+  IRC internet relay chat
+  mail data to be later retrieved
+  print data to paper
+  HIVE 
+  nethack
+  code
+  WALL nfs
+  syslog
+  motd
+  CENSUS
+  REP
+  ntp
+EXTERNAL
+  scp encrypted file transfer
+  ssh encrypted shell tunnel
+  ping
+  nmap
+  http
+  wifi
+  ehternet
+  minecraft
+  squid-proxy

@@ -1,0 +1,17 @@
+# USERS ###########################
+con    
+   physical-host console user
+norm
+   ssh user in a jail isolated from host
+heir
+   ssh user in a jail isolated from host
+   only user group to access host 
+lord 
+   host access groups
+   only access from jail heir group
+   each group responsible for section of system
+# ROOT ############################
+only one way to root a computer
+
+con or other network user ssh
+   heir $KEY -> ssh ANONI heir -> RABBIT $KEY -> ssh host RABBIT -> su root 
